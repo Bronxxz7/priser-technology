@@ -1,0 +1,38 @@
+.web-layout {
+  height: 100vh;
+  display: flex;
+  background: var(--background);
+  overflow: hidden;
+}
+
+.web-layout__body {
+  flex: 1;
+  min-width: 0;
+  margin-left: 260px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.web-layout__main {
+  flex: 1;
+  padding: 26px 28px 40px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.web-layout__main::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .web-layout__body {
+    margin-left: 82px;
+  }
+
+  .web-layout__main {
+    padding: 20px;
+  }
+}

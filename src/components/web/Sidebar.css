@@ -1,0 +1,296 @@
+.sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 260px;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #0f172a;
+  color: white;
+
+  z-index: 100;
+
+  overflow: hidden;
+}
+
+/* =========================
+   LOGO / CABECERA
+========================= */
+
+.sidebar__brand {
+  min-height: 78px;
+  height: 78px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 20px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  flex-shrink: 0;
+}
+
+.sidebar__logo-box {
+  width: 46px;
+  height: 46px;
+
+  min-width: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 13px;
+
+  background: #ffffff;
+}
+
+.sidebar__logo-img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+}
+
+.sidebar__brand-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__brand-info strong {
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__brand-info span {
+  margin-top: 4px;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================
+   CONTENEDOR DEL MENÚ
+========================= */
+
+.sidebar__scroll {
+  flex: 1;
+
+  min-height: 0;
+
+  padding: 14px 12px 24px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar__scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+
+  display: none;
+}
+
+/* =========================
+   SECCIONES
+========================= */
+
+.sidebar__section {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  margin-bottom: 18px;
+}
+
+.sidebar__section:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar__section-title {
+  padding: 9px 12px 7px;
+
+  color: #64748b;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.8px;
+
+  text-transform: uppercase;
+
+  user-select: none;
+}
+
+/* =========================
+   ENLACES
+========================= */
+
+.sidebar__link {
+  width: 100%;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 13px;
+
+  border-radius: 11px;
+
+  color: #cbd5e1;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.sidebar__link svg {
+  min-width: 20px;
+
+  flex-shrink: 0;
+}
+
+.sidebar__link span {
+  min-width: 0;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__link:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar__link:active {
+  transform: scale(0.985);
+}
+
+/* =========================
+   LINK ACTIVO
+========================= */
+
+.sidebar__link--active {
+  color: #ffffff;
+
+  background: #2563eb;
+
+  box-shadow: 0 7px 18px rgba(37, 99, 235, 0.22);
+}
+
+.sidebar__link--active:hover {
+  color: #ffffff;
+
+  background: #2563eb;
+}
+
+/* =========================
+   ESTADOS DE FOCUS
+========================= */
+
+.sidebar__link:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 82px;
+  }
+
+  .sidebar__brand {
+    justify-content: center;
+
+    padding: 0 10px;
+  }
+
+  .sidebar__logo-box {
+    width: 44px;
+    height: 44px;
+
+    min-width: 44px;
+  }
+
+  .sidebar__brand-info {
+    display: none;
+  }
+
+  .sidebar__scroll {
+    padding: 14px 10px 24px;
+  }
+
+  .sidebar__section {
+    gap: 6px;
+  }
+
+  .sidebar__section-title {
+    display: none;
+  }
+
+  .sidebar__link {
+    min-height: 48px;
+
+    justify-content: center;
+
+    padding: 0;
+
+    gap: 0;
+
+    border-radius: 12px;
+  }
+
+  .sidebar__link span {
+    display: none;
+  }
+
+  .sidebar__link svg {
+    min-width: unset;
+  }
+}
