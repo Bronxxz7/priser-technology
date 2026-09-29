@@ -321,8 +321,24 @@ export function suscribirseConfirmaciones({
     return () => {};
   }
 
+  /*
+    IMPORTANTE:
+    Aunque una cuenta tenga rol administrador, si está asociada
+    a una tienda concreta (por ejemplo MOVISTAR), NO debe abrir
+    un listener global de confirmaciones.
+
+    El listener global se usa únicamente cuando realmente no hay
+    una tienda concreta y la llamada viene del superadministrador.
+  */
+  const consultaGlobal =
+    esAdministrador === true &&
+    (
+      !tiendaId ||
+      tiendaId === "todas"
+    );
+
   const referencia =
-    esAdministrador
+    consultaGlobal
       ? collection(
           db,
           "notificacionesConfirmaciones"

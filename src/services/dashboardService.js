@@ -1,12 +1,44 @@
 import {
   collection,
   getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 
 import {
   db,
 } from "../firebase/firebaseConfig";
 
+
+
+
+function referenciaPorTienda(
+  nombreColeccion,
+  tiendaId,
+  campo = "tiendaId"
+) {
+  if (
+    !tiendaId ||
+    tiendaId === "todas"
+  ) {
+    return collection(
+      db,
+      nombreColeccion
+    );
+  }
+
+  return query(
+    collection(
+      db,
+      nombreColeccion
+    ),
+    where(
+      campo,
+      "==",
+      tiendaId
+    )
+  );
+}
 
 function numero(valor) {
   const convertido =
@@ -176,51 +208,52 @@ export async function obtenerDashboard(
     cierresSnap,
   ] = await Promise.all([
     getDocs(
-      collection(
-        db,
-        "cajas"
+      referenciaPorTienda(
+        "cajas",
+        tiendaId
       )
     ),
 
     getDocs(
-      collection(
-        db,
-        "ventas"
+      referenciaPorTienda(
+        "ventas",
+        tiendaId
       )
     ),
 
     getDocs(
-      collection(
-        db,
-        "gastos"
+      referenciaPorTienda(
+        "gastos",
+        tiendaId
       )
     ),
 
     getDocs(
-      collection(
-        db,
-        "ingresos"
+      referenciaPorTienda(
+        "ingresos",
+        tiendaId
       )
     ),
 
     getDocs(
-      collection(
-        db,
-        "retiros"
+      referenciaPorTienda(
+        "retiros",
+        tiendaId
       )
     ),
 
     getDocs(
-      collection(
-        db,
-        "equipos"
+      referenciaPorTienda(
+        "equipos",
+        tiendaId,
+        "ubicacionActual"
       )
     ),
 
     getDocs(
-      collection(
-        db,
-        "cierresCaja"
+      referenciaPorTienda(
+        "cierresCaja",
+        tiendaId
       )
     ),
 

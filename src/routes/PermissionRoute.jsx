@@ -17,6 +17,21 @@ export function tienePermisoPerfil(
     return true;
   }
 
+  /*
+    Equipos es inventario compartido de consulta.
+    Cualquier cuenta ACTIVA puede entrar al módulo y buscar
+    equipos de todas las tiendas.
+
+    Crear, editar, transferir y eliminar continúan dependiendo
+    de los permisos específicos del usuario.
+  */
+  if (
+    modulo === "equipos" &&
+    accion === "ver"
+  ) {
+    return true;
+  }
+
   return (
     perfil.permisos?.[modulo]?.[accion] === true
   );

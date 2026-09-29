@@ -26,6 +26,10 @@ import {
 } from "../../context/TiendaContext";
 
 import {
+  useAuth,
+} from "../../context/AuthContext";
+
+import {
   crearEquipo,
   editarEquipo,
   eliminarEquipo,
@@ -57,6 +61,142 @@ function Equipos() {
     tiendaActiva,
   } = useTienda();
 
+  const {
+    perfil,
+  } = useAuth();
+
+  const esSuperAdmin =
+    perfil?.superAdmin ===
+    true;
+
+  const permisosEquipos =
+    perfil?.permisos?.equipos ||
+    {};
+
+  const puedeCrearEquipo =
+    esSuperAdmin ||
+    permisosEquipos.crear ===
+      true;
+
+  const puedeEditarEquipo =
+    esSuperAdmin ||
+    permisosEquipos.editar ===
+      true;
+
+  const puedeTransferirEquipo =
+    esSuperAdmin ||
+    permisosEquipos.transferir ===
+      true;
+
+  const puedeEliminarEquipo =
+    esSuperAdmin ||
+    permisosEquipos.eliminar ===
+      true;
+
+  const tiendasPermitidasUsuario =
+    useMemo(() => {
+      const ids =
+        new Set();
+
+      if (
+        Array.isArray(
+          perfil?.tiendasPermitidas
+        )
+      ) {
+        perfil.tiendasPermitidas.forEach(
+          (id) => {
+            const limpio =
+              String(
+                id || ""
+              )
+                .trim()
+                .toLowerCase();
+
+            if (
+              limpio &&
+              limpio !==
+                "todas"
+            ) {
+              ids.add(
+                limpio
+              );
+            }
+          }
+        );
+      }
+
+      const principal =
+        String(
+          perfil?.tiendaId ||
+          ""
+        )
+          .trim()
+          .toLowerCase();
+
+      if (
+        principal &&
+        principal !== "todas"
+      ) {
+        ids.add(
+          principal
+        );
+      }
+
+      return Array.from(
+        ids
+      );
+    }, [
+      perfil?.tiendaId,
+      perfil?.tiendasPermitidas,
+    ]);
+
+  function puedeGestionarTienda(
+    tiendaId
+  ) {
+    if (esSuperAdmin) {
+      return true;
+    }
+
+    return tiendasPermitidasUsuario.includes(
+      String(
+        tiendaId || ""
+      )
+        .trim()
+        .toLowerCase()
+    );
+  }
+
+  const tiendasActivas =
+    useMemo(
+      () =>
+        tiendas.filter(
+          (tienda) =>
+            tienda.activo !==
+            false
+        ),
+      [
+        tiendas,
+      ]
+    );
+
+  const tiendasGestionables =
+    useMemo(
+      () =>
+        esSuperAdmin
+          ? tiendasActivas
+          : tiendasActivas.filter(
+              (tienda) =>
+                puedeGestionarTienda(
+                  tienda.id
+                )
+            ),
+      [
+        esSuperAdmin,
+        tiendasActivas,
+        tiendasPermitidasUsuario,
+      ]
+    );
+
   const [
     equipos,
     setEquipos,
@@ -66,6 +206,11 @@ function Equipos() {
     busqueda,
     setBusqueda,
   ] = useState("");
+
+  const [
+    filtroTienda,
+    setFiltroTienda,
+  ] = useState("todas");
 
   const [
     filtroEstado,
@@ -251,21 +396,33 @@ function Equipos() {
 
 
   /* =========================================================
-     EQUIPOS DE LA TIENDA ACTUAL
+     INVENTARIO GLOBAL
+
+     Todos los usuarios que pueden entrar al módulo Equipos
+     consultan el inventario de TODAS las tiendas.
+
+     El selector de tienda de este módulo sirve únicamente
+     como filtro visual. No cambia la tienda operativa del
+     usuario ni sus permisos para editar/transferir.
   ========================================================= */
 
   const equiposDeTienda =
     useMemo(() => {
+      if (
+        filtroTienda ===
+        "todas"
+      ) {
+        return equipos;
+      }
+
       return equipos.filter(
         (equipo) =>
-          tiendaActiva?.id ===
-            "todas" ||
           equipo.ubicacionActual ===
-            tiendaActiva?.id
+          filtroTienda
       );
     }, [
       equipos,
-      tiendaActiva,
+      filtroTienda,
     ]);
 
 
@@ -1150,24 +1307,23 @@ Esta acción no se puede deshacer.`
           </h1>
 
           <p>
-            {tiendaActiva?.id ===
-            "todas"
-              ? "Inventario real de todas las tiendas."
-              : `Inventario de ${tiendaActiva?.nombre || ""}.`}
+            Inventario compartido de todas las tiendas. Puedes buscar un equipo y ver en qué tienda está disponible.
           </p>
         </div>
 
-        <button
-          type="button"
-          className="equipos-add"
-          onClick={
-            abrirFormulario
-          }
-        >
-          <Plus size={18} />
+        {puedeCrearEquipo && (
+          <button
+            type="button"
+            className="equipos-add"
+            onClick={
+              abrirFormulario
+            }
+          >
+            <Plus size={18} />
 
-          Registrar equipos
-        </button>
+            Registrar equipos
+          </button>
+        )}
 
       </div>
 
@@ -1280,7 +1436,7 @@ Esta acción no se puede deshacer.`
           <Search size={18} />
 
           <input
-            placeholder="Buscar marca, modelo, IMEI, color..."
+            placeholder="Buscar marca, modelo, IMEI, color o tienda..."
             value={busqueda}
             onChange={(event) =>
               setBusqueda(
@@ -1290,6 +1446,38 @@ Esta acción no se puede deshacer.`
           />
 
         </div>
+
+
+        <select
+          value={filtroTienda}
+          onChange={(event) =>
+            setFiltroTienda(
+              event.target.value
+            )
+          }
+        >
+          <option value="todas">
+            Todas las tiendas
+          </option>
+
+          {tiendasActivas.map(
+            (tienda) => (
+              <option
+                key={
+                  tienda.id
+                }
+                value={
+                  tienda.id
+                }
+              >
+                {tienda.nombre ||
+                  String(
+                    tienda.id
+                  ).toUpperCase()}
+              </option>
+            )
+          )}
+        </select>
 
 
         <select
@@ -1672,6 +1860,11 @@ Esta acción no se puede deshacer.`
                                       unidad.estado ===
                                       "vendido";
 
+                                    const puedeGestionarUnidad =
+                                      puedeGestionarTienda(
+                                        unidad.ubicacionActual
+                                      );
+
                                     return (
                                       <div
                                         className="equipos-unit"
@@ -1712,71 +1905,80 @@ Esta acción no se puede deshacer.`
 
                                         <div className="equipos-actions">
 
-                                          <button
-                                            type="button"
-                                            className="icon-action"
-                                            title="Editar esta unidad"
-                                            disabled={
-                                              eliminandoId === unidad.id
-                                            }
-                                            onClick={() =>
-                                              abrirEdicion(
-                                                unidad
-                                              )
-                                            }
-                                          >
-                                            <Pencil
-                                              size={15}
-                                            />
-                                          </button>
+                                          {puedeEditarEquipo &&
+                                            puedeGestionarUnidad && (
+                                              <button
+                                                type="button"
+                                                className="icon-action"
+                                                title="Editar esta unidad"
+                                                disabled={
+                                                  eliminandoId === unidad.id
+                                                }
+                                                onClick={() =>
+                                                  abrirEdicion(
+                                                    unidad
+                                                  )
+                                                }
+                                              >
+                                                <Pencil
+                                                  size={15}
+                                                />
+                                              </button>
+                                            )}
 
 
-                                          <button
-                                            type="button"
-                                            className="icon-action"
-                                            title={
-                                              unidadVendida
-                                                ? "El equipo vendido no se puede transferir"
-                                                : "Transferir esta unidad"
-                                            }
-                                            disabled={
-                                              unidadVendida ||
-                                              eliminandoId === unidad.id
-                                            }
-                                            onClick={() =>
-                                              abrirTransferencia(
-                                                unidad
-                                              )
-                                            }
-                                          >
-                                            <ArrowRightLeft
-                                              size={15}
-                                            />
-                                          </button>
+                                          {puedeTransferirEquipo &&
+                                            puedeGestionarUnidad && (
+                                              <button
+                                                type="button"
+                                                className="icon-action"
+                                                title={
+                                                  unidadVendida
+                                                    ? "El equipo vendido no se puede transferir"
+                                                    : "Transferir esta unidad"
+                                                }
+                                                disabled={
+                                                  unidadVendida ||
+                                                  eliminandoId === unidad.id
+                                                }
+                                                onClick={() =>
+                                                  abrirTransferencia(
+                                                    unidad
+                                                  )
+                                                }
+                                              >
+                                                <ArrowRightLeft
+                                                  size={15}
+                                                />
+                                              </button>
+                                            )}
 
 
-                                          <button
-                                            type="button"
-                                            className="icon-action icon-action--danger"
-                                            title={
-                                              unidadVendida
-                                                ? "No se puede borrar un equipo vendido"
-                                                : "Eliminar equipo definitivamente"
-                                            }
-                                            disabled={
-                                              unidadVendida ||
-                                              eliminandoId === unidad.id
-                                            }
-                                            onClick={() =>
-                                              borrarEquipo(
-                                                unidad
-                                              )
-                                            }
-                                          >
-                                            <Trash2
-                                              size={15}
-                                            />
-                                          </button>
+                                          {puedeEliminarEquipo &&
+                                            puedeGestionarUnidad && (
+                                              <button
+                                                type="button"
+                                                className="icon-action icon-action--danger"
+                                                title={
+                                                  unidadVendida
+                                                    ? "No se puede borrar un equipo vendido"
+                                                    : "Eliminar equipo definitivamente"
+                                                }
+                                                disabled={
+                                                  unidadVendida ||
+                                                  eliminandoId === unidad.id
+                                                }
+                                                onClick={() =>
+                                                  borrarEquipo(
+                                                    unidad
+                                                  )
+                                                }
+                                              >
+                                                <Trash2
+                                                  size={15}
+                                                />
+                                              </button>
+                                            )}
 
                                         </div>
 
@@ -2109,7 +2311,7 @@ Esta acción no se puede deshacer.`
                       Selecciona una tienda
                     </option>
 
-                    {tiendas.map(
+                    {tiendasGestionables.map(
                       (tienda) => (
                         <option
                           key={
@@ -2345,7 +2547,7 @@ Esta acción no se puede deshacer.`
                     Selecciona destino
                   </option>
 
-                  {tiendas
+                  {tiendasActivas
                     .filter(
                       (tienda) =>
                         tienda.id !==

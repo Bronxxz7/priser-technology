@@ -105,9 +105,12 @@ function NotificationBell() {
       .trim()
       .toLowerCase();
 
-  const esAdministrador =
+  const esSuperAdmin =
     perfil?.superAdmin ===
-      true ||
+    true;
+
+  const esAdministrador =
+    esSuperAdmin ||
     rol ===
       "administrador" ||
     rol ===
@@ -146,7 +149,7 @@ function NotificationBell() {
 
   function tiendaUsuarioId() {
     if (
-      !esAdministrador &&
+      !esSuperAdmin &&
       tiendaActiva?.id &&
       tiendaActiva.id !==
         "todas"
@@ -200,7 +203,13 @@ function NotificationBell() {
         callback:
           setConfirmaciones,
 
-        esAdministrador,
+        /*
+          Solo el superAdmin consulta confirmaciones de TODAS
+          las tiendas. Un administrador limitado a MOVISTAR,
+          ENTEL, etc. consulta únicamente su propia tienda.
+        */
+        esAdministrador:
+          esSuperAdmin,
 
         tiendaId:
           tiendaUsuario,
@@ -307,7 +316,7 @@ function NotificationBell() {
     notificacion
   ) {
     if (
-      esAdministrador
+      esSuperAdmin
     ) {
       return true;
     }
@@ -340,6 +349,7 @@ function NotificationBell() {
       [
         notificaciones,
         esAdministrador,
+        esSuperAdmin,
         tiendaUsuario,
       ]
     );
@@ -349,7 +359,7 @@ function NotificationBell() {
     useMemo(
       () => {
         if (
-          esAdministrador
+          esSuperAdmin
         ) {
           return visibles.filter(
             (notificacion) => {
@@ -387,6 +397,7 @@ function NotificationBell() {
         visibles,
         confirmacionPorClave,
         esAdministrador,
+        esSuperAdmin,
         tiendaUsuario,
         tiendasReales,
       ]
